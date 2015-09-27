@@ -18,9 +18,8 @@ def listen_to_telegram(token, queue):
         updates = telegram_bot.getUpdates(offset=last_update + 1)
         for update in updates:
             print 'Received from telegram:', update
-            if update.message.chat.title == 'NEM::Red':
-                queue.put(update)
-                last_update = update['update_id']
+            queue.put(update)
+            last_update = update['update_id']
         time.sleep(1)
 
 
@@ -34,6 +33,9 @@ def forward_to_telegram(token, queue):
     while True:
         update = queue.get()
         username = update['user']['name']
+        channel = '-14284494'
+        if update['channel'] == 'G0BCJ6A11':  # id for NEM::Tech, y look it up?
+            channel = '-23053030'
         message = '%s \n %s' % (username, update['text'])
-        telegram_bot.sendMessage(chat_id='-14284494',
+        telegram_bot.sendMessage(chat_id=channel,
                                 text=message)

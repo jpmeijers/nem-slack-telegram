@@ -5,7 +5,30 @@ Created on 26.09.2015
 '''
 import time
 import json
+import re
 from slackclient import SlackClient
+
+CHANNEL_MATCHING = {-14284494: 'nem_red'}
+
+
+def resolve_user(bot, uid):
+    user = json.loads(bot.api_call('users.info',
+                                     user=uid))
+    return user['user']
+
+
+def prep_message(bot, update):
+    user = resolve_user(bot, update['user'])
+    marked_users = set([m.group(1) for m in
+                                    re.finditer('<@([A-Z0-9]+)>',
+                                                update['text'])])
+    for marked_user in marked_users:
+        username = resolve_user(bot, marked_user)['name']
+        update['text'] = update['text'].replace(marked_user,
+                                                                username)
+    update['user'] = user
+
+    return update
 
 
 def listen_to_slack(token, queue):
@@ -27,9 +50,7 @@ def listen_to_slack(token, queue):
                     continue
                 else:
                     #resolve user
-                    user = json.loads(slack.api_call('users.info',
-                                     user=update['user']))
-                    update['user'] = user['user']
+                    update = prep_message(slack, update)
                     queue.put(update)
                 time.sleep(1)
     else:
@@ -46,8 +67,13 @@ def forward_to_slack(token, queue):
     print 'Ready to forward to Slack'
     while True:
         update = queue.get()
+        channel = ''
+        if update.message.chat.title == 'NEM::Red':
+            channel = 'nem_red'
+        if update.message.chat.title == 'NEM::Tech':
+            channel = 'nem_tech'
         slack.api_call('chat.postMessage',
-                        channel='nem_red',
+                        channel=channel,
                         text=update.message.text.encode('utf-8'),
                         username=update.message.from_user.username)
 

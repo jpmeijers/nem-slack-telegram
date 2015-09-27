@@ -11,6 +11,8 @@ import time
 
 SLACK_TOKEN = 'xoxb-11406663559-mTpyvwOxMSsE1pzTq5YoXyMO'
 TELEGRAM_TOKEN = '131728076:AAGclALKrc3Talha48OkD2xx9R-EWwBgCcU'
+CHANNEL_MATCHIN = []
+
 
 '''Queues are used to pass information between Threads. Duh!'''
 slack_output_queue = Queue.Queue()
