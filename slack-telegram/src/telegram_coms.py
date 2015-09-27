@@ -19,16 +19,19 @@ def listen_to_telegram(token, queue):
     last_update = 0
     print 'Listening to Telegram'
     while True:
-        updates = telegram_bot.getUpdates(offset=last_update + 1)
-        for update in updates:
-            print 'Received from telegram:', update
-            if update.message.photo:
-                print 'RECEIVED PHOTO!'
-                update.message.text = download_file(telegram_bot,
-                                                  update.message.photo[1].file_id).file_path
-            queue.put(update)
-            last_update = update['update_id']
-        time.sleep(1)
+        try:
+            updates = telegram_bot.getUpdates(offset=last_update + 1)
+            for update in updates:
+                print 'Received from telegram:', update
+                if update.message.photo:
+                    print 'RECEIVED PHOTO!'
+                    update.message.text = download_file(telegram_bot,
+                                                      update.message.photo[1].file_id).file_path
+                queue.put(update)
+                last_update = update['update_id']
+            time.sleep(1)
+        except:
+            print 'Something went wrong'  # fuck it so it won't crash ever
 
 
 def forward_to_telegram(token, queue):
@@ -39,14 +42,17 @@ def forward_to_telegram(token, queue):
     telegram_bot = telegram.Bot(token)
     print 'Ready to forward to Telegram'
     while True:
-        update = queue.get()
         try:
-            username = update['user']['name']
-        except KeyError:
-            username = 'slacker'
-        channel = '-14284494'
-        if update['channel'] == 'G0BCJ6A11':  # id for NEM::Tech, y look it up?
-            channel = '-23053030'
-        message = '%s \n %s' % (username, update['text'])
-        telegram_bot.sendMessage(chat_id=channel,
-                                text=message)
+            update = queue.get()
+            try:
+                username = update['user']['name']
+            except KeyError:
+                username = 'slacker'
+            channel = '-14284494'  # id for NEM::Red as default
+            if update['channel'] == 'G0BCJ6A11':  # id for NEM::Tech
+                channel = '-23053030'
+            message = '%s \n %s' % (username, update['text'])
+            telegram_bot.sendMessage(chat_id=channel,
+                                    text=message)
+        except:
+            print 'Something went wrong'  # fuck it so it won't crash ever

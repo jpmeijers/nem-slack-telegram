@@ -44,20 +44,23 @@ def listen_to_slack(token, queue):
     if slack.rtm_connect():
         print 'Listening to Slack'
         while True:
-            updates = slack.rtm_read()
-            for update in updates:
-                print 'Received from slack', update
-                if update.get('subtype') == 'bot_message':
-                    #msg from a bot - move on
-                    continue
-                if not update.get('text'):
-                    #no text = move on
-                    continue
-                else:
-                    #resolve user
-                    update = prep_message(slack, update)
-                    queue.put(update)
-                time.sleep(1)
+            try:
+                updates = slack.rtm_read()
+                for update in updates:
+                    print 'Received from slack', update
+                    if update.get('subtype') == 'bot_message':
+                        #msg from a bot - move on
+                        continue
+                    if not update.get('text'):
+                        #no text = move on
+                        continue
+                    else:
+                        #resolve user
+                        update = prep_message(slack, update)
+                        queue.put(update)
+                    time.sleep(1)
+            except:
+                print 'Something went wrong'  # fuck it so it won't crash ever
     else:
         print 'Failed to establish a connection to Slack!'
 
@@ -71,22 +74,25 @@ def forward_to_slack(token, queue):
     slack = SlackClient(token)
     print 'Ready to forward to Slack'
     while True:
-        update = queue.get()
-        channel = ''
-        if update.message.chat.title == 'NEM::Red':
-            channel = 'nem_red'
-        if update.message.chat.title == 'NEM::Tech':
-            channel = 'nem_tech'
+        try:
+            update = queue.get()
+            channel = ''
+            if update.message.chat.title == 'NEM::Red':
+                channel = 'nem_red'
+            if update.message.chat.title == 'NEM::Tech':
+                channel = 'nem_tech'
 
-        message = update.message.text.encode('utf-8')
-        if update.message.reply_to_message:
-            message = '>%s:\n>%s\n%s' % (update.message.reply_to_message.from_user.username,
-                                       update.message.reply_to_message.text.encode('utf-8'),
-                                       message)
-        slack.api_call('chat.postMessage',
-                        channel=channel,
-                        text=message,
-                        username=update.message.from_user.username)
+            message = update.message.text.encode('utf-8')
+            if update.message.reply_to_message:
+                message = '>%s:\n>%s\n%s' % (update.message.reply_to_message.from_user.username,
+                                           update.message.reply_to_message.text.encode('utf-8'),
+                                           message)
+            slack.api_call('chat.postMessage',
+                            channel=channel,
+                            text=message,
+                            username=update.message.from_user.username)
+        except:
+            print 'Something went wrong'  # fuck it so it won't crash ever
 
 
 def post_to_slack(token, message, user, channel):

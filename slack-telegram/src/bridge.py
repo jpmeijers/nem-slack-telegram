@@ -53,9 +53,12 @@ telegram_forward_thread.start()
 
 if __name__ == '__main__':
     while True:
-        message = 'Running Threads: ' + ', '.join(thread.name for
-                                                 thread in
-                                                 threading.enumerate())
-        slack_coms.post_to_slack(SLACK_TOKEN, message, 'diagnostics',
-                                 'pats-testing-range')
-        time.sleep(60 * 30)
+        try:
+            message = 'Running Threads: ' + ', '.join(thread.name for
+                                                     thread in
+                                                     threading.enumerate())
+            slack_coms.post_to_slack(SLACK_TOKEN, message, 'diagnostics',
+                                     'pats-testing-range')
+            time.sleep(60 * 30)
+        except:
+            print 'Something went wrong'  # fuck it so it won't crash ever
