@@ -18,16 +18,21 @@ def resolve_user(bot, uid):
 
 
 def prep_message(bot, update):
-    user = resolve_user(bot, update['user'])
-    marked_users = set([m.group(1) for m in
-                                    re.finditer('<@([A-Z0-9]+)>',
-                                                update['text'])])
-    for marked_user in marked_users:
-        username = resolve_user(bot, marked_user)['name']
-        update['text'] = update['text'].replace(marked_user,
-                                                                username)
-    update['user'] = user
-
+    try:
+        #resolve mentionings
+        user = resolve_user(bot, update['user'])
+        marked_users = set([m.group(1) for m in
+                                        re.finditer('<@([A-Z0-9]+)>',
+                                                    update['text'])])
+        for marked_user in marked_users:
+            username = resolve_user(bot, marked_user)['name']
+            update['text'] = update['text'].replace(marked_user,
+                                                                    username)
+        update['user'] = user
+        #replace emots
+        update['text'] = update['text'].replace(':stuck_out_tongue:', ':P').replace(':smile:', ':)')
+    except:
+        pass  # fuck anything
     return update
 
 
@@ -72,9 +77,15 @@ def forward_to_slack(token, queue):
             channel = 'nem_red'
         if update.message.chat.title == 'NEM::Tech':
             channel = 'nem_tech'
+
+        message = update.message.text.encode('utf-8')
+        if update.message.reply_to_message:
+            message = '>%s:\n>%s\n%s' % (update.message.reply_to_message.from_user.username,
+                                       update.message.reply_to_message.text.encode('utf-8'),
+                                       message)
         slack.api_call('chat.postMessage',
                         channel=channel,
-                        text=update.message.text.encode('utf-8'),
+                        text=message,
                         username=update.message.from_user.username)
 
 

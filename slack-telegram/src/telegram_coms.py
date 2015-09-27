@@ -32,7 +32,10 @@ def forward_to_telegram(token, queue):
     print 'Ready to forward to Telegram'
     while True:
         update = queue.get()
-        username = update['user']['name']
+        try:
+            username = update['user']['name']
+        except KeyError:
+            username = 'slacker'
         channel = '-14284494'
         if update['channel'] == 'G0BCJ6A11':  # id for NEM::Tech, y look it up?
             channel = '-23053030'
