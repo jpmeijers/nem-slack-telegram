@@ -7,6 +7,10 @@ import telegram
 import time
 
 
+def download_file(bot, file_id):
+    return bot.getFile(file_id=file_id)
+
+
 def listen_to_telegram(token, queue):
     '''
     Queries Telegram for Updates and puts them into a queue.
@@ -18,6 +22,10 @@ def listen_to_telegram(token, queue):
         updates = telegram_bot.getUpdates(offset=last_update + 1)
         for update in updates:
             print 'Received from telegram:', update
+            if update.message.photo:
+                print 'RECEIVED PHOTO!'
+                update.message.text = download_file(telegram_bot,
+                                                  update.message.photo[1].file_id).file_path
             queue.put(update)
             last_update = update['update_id']
         time.sleep(1)
