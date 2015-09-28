@@ -84,8 +84,10 @@ def forward_to_slack(token, queue):
 
             message = update.message.text.encode('utf-8')
             if update.message.reply_to_message:
+                reply_to_message = update.message.reply_to_message.text.encode('utf-8')
+                reply_to_message = reply_to_message.replace('\n', '\n>')
                 message = '>%s:\n>%s\n%s' % (update.message.reply_to_message.from_user.username,
-                                           update.message.reply_to_message.text.encode('utf-8'),
+                                           reply_to_message,
                                            message)
             slack.api_call('chat.postMessage',
                             channel=channel,
