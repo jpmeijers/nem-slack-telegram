@@ -90,7 +90,7 @@ def forward_to_slack(token, queue):
             slack.api_call('chat.postMessage',
                             channel=channel,
                             text=message,
-                            username=update.message.from_user.username)
+                            username=update.message.from_user.username, icon_url=update.message.from_user.avatar)
         except:
             print 'Something went wrong'  # fuck it so it won't crash ever
 

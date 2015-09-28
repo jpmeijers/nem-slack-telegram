@@ -11,6 +11,14 @@ def download_file(bot, file_id):
     return bot.getFile(file_id=file_id)
 
 
+def download_avatar(bot, uid):
+    try:
+        file_id = bot.getUserProfilePhotos(uid).photos[0][0].file_id
+        return download_file(bot, file_id).file_path
+    except:
+        return None
+
+
 def listen_to_telegram(token, queue):
     '''
     Queries Telegram for Updates and puts them into a queue.
@@ -27,12 +35,18 @@ def listen_to_telegram(token, queue):
                     print 'RECEIVED PHOTO!'
                     update.message.text = download_file(telegram_bot,
                                                       update.message.photo[1].file_id).file_path
+                #get avatar
+                avatar = download_avatar(telegram_bot,
+                                         update.message.from_user.id)
+                if avatar:
+                    update.message.from_user.avatar = avatar
                 queue.put(update)
                 last_update = update['update_id']
             time.sleep(1)
-        except:
-            print 'Something went wrong'  # fuck it so it won't crash ever
-
+        except Exception, e:
+            print 'Something went wrong - listening to telegram'  # fuck it so it won't crash ever
+            print str(e)
+            time.sleep(5)
 
 def forward_to_telegram(token, queue):
     '''
