@@ -9,9 +9,9 @@ import slack_coms
 import telegram_coms
 import time
 
-SLACK_TOKEN = 'xoxb-11406663559-mTpyvwOxMSsE1pzTq5YoXyMO'
-TELEGRAM_TOKEN = '131728076:AAGclALKrc3Talha48OkD2xx9R-EWwBgCcU'
-CHANNEL_MATCHIN = []
+SLACK_TOKEN = ''
+TELEGRAM_TOKEN = ''
+
 
 
 '''Queues are used to pass information between Threads. Duh!'''
