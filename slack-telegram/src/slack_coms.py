@@ -59,8 +59,9 @@ def listen_to_slack(token, queue):
                         update = prep_message(slack, update)
                         queue.put(update)
                     time.sleep(1)
-            except:
-                print 'Something went wrong'  # fuck it so it won't crash ever
+            except Exception, e:
+                print 'Something went wrong - listening to Slack'  # fuck it so it won't crash ever
+                print str(e)
     else:
         print 'Failed to establish a connection to Slack!'
 
@@ -93,8 +94,9 @@ def forward_to_slack(token, queue):
                             channel=channel,
                             text=message,
                             username=update.message.from_user.username, icon_url=update.message.from_user.avatar)
-        except:
-            print 'Something went wrong'  # fuck it so it won't crash ever
+        except Exception, e:
+            print 'Something went wrong - forwarding to Slack'  # fuck it so it won't crash ever
+            print str(e)
 
 
 def post_to_slack(token, message, user, channel):

@@ -38,15 +38,13 @@ def listen_to_telegram(token, queue):
                 #get avatar
                 avatar = download_avatar(telegram_bot,
                                          update.message.from_user.id)
-                if avatar:
-                    update.message.from_user.avatar = avatar
+                update.message.from_user.avatar = avatar
                 queue.put(update)
                 last_update = update['update_id']
             time.sleep(1)
         except Exception, e:
             print 'Something went wrong - listening to telegram'  # fuck it so it won't crash ever
             print str(e)
-            time.sleep(5)
 
 def forward_to_telegram(token, queue):
     '''
@@ -68,5 +66,6 @@ def forward_to_telegram(token, queue):
             message = '%s \n %s' % (username, update['text'])
             telegram_bot.sendMessage(chat_id=channel,
                                     text=message)
-        except:
-            print 'Something went wrong'  # fuck it so it won't crash ever
+        except Exception, e:
+            print 'Something went wrong - forwarding to telegram'  # fuck it so it won't crash ever
+            print str(e)
