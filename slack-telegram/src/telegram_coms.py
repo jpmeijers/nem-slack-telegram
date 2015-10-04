@@ -34,7 +34,7 @@ def listen_to_telegram(token, queue):
                 if update.message.photo:
                     print 'RECEIVED PHOTO!'
                     update.message.text = download_file(telegram_bot,
-                                                      update.message.photo[1].file_id).file_path
+                                                      update.message.photo[-1].file_id).file_path
                 #get avatar
                 avatar = download_avatar(telegram_bot,
                                          update.message.from_user.id)
@@ -45,6 +45,8 @@ def listen_to_telegram(token, queue):
         except Exception, e:
             print 'Something went wrong - listening to telegram'  # fuck it so it won't crash ever
             print str(e)
+            time.sleep(5)
+
 
 def forward_to_telegram(token, queue):
     '''
@@ -69,3 +71,4 @@ def forward_to_telegram(token, queue):
         except Exception, e:
             print 'Something went wrong - forwarding to telegram'  # fuck it so it won't crash ever
             print str(e)
+            time.sleep(5)

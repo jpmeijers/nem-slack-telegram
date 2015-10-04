@@ -55,13 +55,13 @@ def listen_to_slack(token, queue):
                         #no text = move on
                         continue
                     else:
-                        #resolve user
                         update = prep_message(slack, update)
                         queue.put(update)
                     time.sleep(1)
             except Exception, e:
                 print 'Something went wrong - listening to Slack'  # fuck it so it won't crash ever
                 print str(e)
+                time.sleep(5)
     else:
         print 'Failed to establish a connection to Slack!'
 
@@ -97,6 +97,7 @@ def forward_to_slack(token, queue):
         except Exception, e:
             print 'Something went wrong - forwarding to Slack'  # fuck it so it won't crash ever
             print str(e)
+            time.sleep(5)
 
 
 def post_to_slack(token, message, user, channel):
