@@ -6,6 +6,10 @@ Created on 26.09.2015
 import telegram
 import time
 
+CHANNEL_MATCHING = {'G0BCJ6A11': '-23053030',
+                    'G085E7UF2': '-14284494',
+                    'G0C7PQQ5V': '-11209025'}
+
 
 def download_file(bot, file_id):
     return bot.getFile(file_id=file_id)
@@ -63,11 +67,11 @@ def forward_to_telegram(token, queue):
                 username = update['user']['name']
             except KeyError:
                 username = 'slacker'
-            channel = '-14284494'  # id for NEM::Red as default
-            if update['channel'] == 'G0BCJ6A11':  # id for NEM::Tech
-                channel = '-23053030'
-            if update['channel'] == 'G0C7PQQ5V':  # id for NEM::Mobile
-                channel = '-23053030'
+            try:
+                channel = CHANNEL_MATCHING[update['channel']]
+            except KeyError:
+                print 'Got Message from unknown channel: %s ' % update['channel']
+                continue
             message = '%s \n %s' % (username, update['text'])
             telegram_bot.sendMessage(chat_id=channel,
                                     text=message)

@@ -9,7 +9,8 @@ import re
 from slackclient import SlackClient
 
 CHANNEL_MATCHING = {'NEM::Red': 'nem_red',
-                    'NEM::Tech': 'nem_tech'}
+                    'NEM::Tech': 'nem_tech',
+                    'NEM::Mobile Testnet': 'nem_mobile_testing'}
 
 EMO_MATCHING = {':stuck_out_tongue:': ':P',
                 ':smile:': ':D',
@@ -91,6 +92,7 @@ def forward_to_slack(token, queue):
                 channel = CHANNEL_MATCHING[update.message.chat.title]
             except KeyError:
                 print 'Got Message from unknown channel: %s ' % update.message.chat.title
+                continue
             message = update.message.text.encode('utf-8')
 
             #resolve quotes
