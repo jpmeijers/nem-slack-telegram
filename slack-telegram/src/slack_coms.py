@@ -8,13 +8,24 @@ import json
 import re
 from slackclient import SlackClient
 
-CHANNEL_MATCHING = {-14284494: 'nem_red'}
+CHANNEL_MATCHING = {'NEM::Red': 'nem_red',
+                    'NEM::Tech': 'nem_tech'}
+
+EMO_MATCHING = {':stuck_out_tongue:': ':P',
+                ':smile:': ':D',
+                ':simple_smile:': ':)',}
 
 
 def resolve_user(bot, uid):
     user = json.loads(bot.api_call('users.info',
                                      user=uid))
     return user['user']
+
+
+def replace_emos(text):
+    for i, j in EMO_MATCHING.iteritems():
+        text = text.replace(i, j)
+    return text
 
 
 def prep_message(bot, update):
@@ -27,10 +38,9 @@ def prep_message(bot, update):
         for marked_user in marked_users:
             username = resolve_user(bot, marked_user)['name']
             update['text'] = update['text'].replace(marked_user,
-                                                                    username)
+                                                    username)
         update['user'] = user
-        #replace emots
-        update['text'] = update['text'].replace(':stuck_out_tongue:', ':P').replace(':smile:', ':)')
+        update['text'] = replace_emos(update['text'])
     except:
         pass  # fuck anything
     return update
@@ -77,23 +87,25 @@ def forward_to_slack(token, queue):
     while True:
         try:
             update = queue.get()
-            channel = ''
-            if update.message.chat.title == 'NEM::Red':
-                channel = 'nem_red'
-            if update.message.chat.title == 'NEM::Tech':
-                channel = 'nem_tech'
-
+            try:
+                channel = CHANNEL_MATCHING[update.message.chat.title]
+            except KeyError:
+                print 'Got Message from unknown channel: %s ' % update.message.chat.title
             message = update.message.text.encode('utf-8')
+
+            #resolve quotes
             if update.message.reply_to_message:
                 reply_to_message = update.message.reply_to_message.text.encode('utf-8')
                 reply_to_message = reply_to_message.replace('\n', '\n>')
                 message = '>%s:\n>%s\n%s' % (update.message.reply_to_message.from_user.username,
                                            reply_to_message,
                                            message)
+
             slack.api_call('chat.postMessage',
                             channel=channel,
                             text=message,
-                            username=update.message.from_user.username, icon_url=update.message.from_user.avatar)
+                            username=update.message.from_user.username,
+                            icon_url=update.message.from_user.avatar)
         except Exception, e:
             print 'Something went wrong - forwarding to Slack'  # fuck it so it won't crash ever
             print str(e)

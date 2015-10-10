@@ -8,17 +8,17 @@ import threading
 import slack_coms
 import telegram_coms
 import time
+import ConfigParser
 
-SLACK_TOKEN = ''
-TELEGRAM_TOKEN = ''
+Config = ConfigParser.ConfigParser()
+Config.read("config.ini")
 
-
+SLACK_TOKEN = Config.get('Token', 'Slack')
+TELEGRAM_TOKEN = Config.get('Token', 'Telegram')
 
 '''Queues are used to pass information between Threads. Duh!'''
 slack_output_queue = Queue.Queue()
-#slack_forward_queue = Queue.Queue()
 telegram_output_queue = Queue.Queue()
-#telegram_forward_queue = Queue.Queue()
 
 
 '''All threads are being created and started.'''
@@ -60,5 +60,7 @@ if __name__ == '__main__':
             slack_coms.post_to_slack(SLACK_TOKEN, message, 'diagnostics',
                                      'pats-testing-range')
             time.sleep(60 * 30)
+        except KeyboardInterrupt:
+            raise
         except:
             print 'Something went wrong'  # fuck it so it won't crash ever
