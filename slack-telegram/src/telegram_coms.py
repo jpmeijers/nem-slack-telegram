@@ -37,13 +37,13 @@ def listen_to_telegram(token, queue):
             for update in updates:
                 print 'Received from telegram:', update
                 if update.message.photo:
-                    print 'RECEIVED PHOTO!'
                     update.message.text = download_file(telegram_bot,
                                                       update.message.photo[-1].file_id).file_path
                 #get avatar
                 avatar = download_avatar(telegram_bot,
                                          update.message.from_user.id)
                 update.message.from_user.avatar = avatar
+                print 'Queued: ', update
                 queue.put(update)
                 last_update = update['update_id']
             time.sleep(1)

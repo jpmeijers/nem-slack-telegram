@@ -67,6 +67,7 @@ def listen_to_slack(token, queue):
                         continue
                     else:
                         update = prep_message(slack, update)
+                        print 'Queued: ', update
                         queue.put(update)
                     time.sleep(1)
             except Exception, e:
@@ -103,11 +104,15 @@ def forward_to_slack(token, queue):
                                            reply_to_message,
                                            message)
 
+            # avatar = update.message.from_user.avatar
+            avatar = 'https://telegram.org/img/t_logo.png' #weird issue that makes slack display wrong icons so fuck it
+            print 'avatar for slack:', avatar
             slack.api_call('chat.postMessage',
                             channel=channel,
                             text=message,
                             username=update.message.from_user.username,
-                            icon_url=update.message.from_user.avatar)
+                            icon_url=avatar
+                            )
         except Exception, e:
             print 'Something went wrong - forwarding to Slack'  # fuck it so it won't crash ever
             print str(e)
