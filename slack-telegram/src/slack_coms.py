@@ -8,20 +8,18 @@ import json
 import re
 from slackclient import SlackClient
 
-CHANNEL_MATCHING = {'NEM::Red': 'nem_red',
-                    'NEM::Tech': 'nem_tech',
-                    'NEM::Mobile Testnet': 'nem_mobile_testing'}
-
-EMO_MATCHING = {':stuck_out_tongue:': ':P',
-                ':smile:': ':D',
-                ':simple_smile:': ':)',
-                ':wink:': ';)', }
-
 
 class SlackManager():
 
     def __init__(self, token, *args, **kwargs):
         self.bot = SlackClient(token)
+        self.channel_matching = {'NEM::Red': 'nem_red',
+                                 'NEM::Tech': 'nem_tech',
+                                 'NEM::Mobile Testnet': 'nem_mobile_testing'}
+        self.emo_matching = {':stuck_out_tongue:': ':P',
+                             ':smile:': ':D',
+                            ':simple_smile:': ':)',
+                            ':wink:': ';)', }
 
     def _resolve_user(self, uid):
         user = json.loads(self.bot.api_call('users.info',
@@ -29,7 +27,7 @@ class SlackManager():
         return user['user']
 
     def replace_emos(self, text):
-        for i, j in EMO_MATCHING.iteritems():
+        for i, j in self.emo_matching.iteritems():
             text = text.replace(i, j)
         return text
 
@@ -54,30 +52,34 @@ class SlackManager():
         '''
         Queries Slack for Updates and puts them into a queue.
         '''
-        if self.bot.rtm_connect():
-            print 'Listening to Slack'
-            while True:
-                try:
-                    updates = self.bot.rtm_read()
-                    for update in updates:
-                        print 'Received from slack', update
-                        if update.get('subtype') == 'bot_message':
-                            #msg from a bot - move on
-                            continue
-                        if not update.get('text'):
-                            #no text = move on
-                            continue
-                        else:
-                            update = self.prep_message(update)
-                            print 'Queued: ', update
-                            queue.put(update)
-                        time.sleep(1)
-                except Exception, e:
-                    print 'Something went wrong - listening to Slack'  # fuck it so it won't crash ever
-                    print str(e)
-                    time.sleep(5)
-        else:
-            print 'Failed to establish a connection to Slack!'
+        while True:
+            if self.bot.rtm_connect():
+                print 'Listening to Slack'
+                while True:
+                    try:
+                        updates = self.bot.rtm_read()
+                        for update in updates:
+                            print 'Received from slack', update
+                            if update.get('subtype') == 'bot_message':
+                                #msg from a bot - move on
+                                continue
+                            if not update.get('text'):
+                                #no text = move on
+                                continue
+                            else:
+                                update = self.prep_message(update)
+                                print 'Queued: ', update
+                                queue.put(update)
+                            time.sleep(1)
+                    except Exception, e:
+                        print 'Something went wrong - listening to Slack'
+                        # fuck it so it won't crash ever
+                        message = ":".join(type(e).__name__, str(e))
+                        self.post_to_slack(message, 'diagnostics',
+                                           'pats-testing-range')
+                        break
+            else:
+                print 'Failed to establish a connection to Slack!'
 
     def forward_to_slack(self, queue):
         '''
@@ -90,9 +92,9 @@ class SlackManager():
             try:
                 update = queue.get()
                 try:
-                    channel = CHANNEL_MATCHING[update.message.chat.title]
+                    channel = self.channel_matching[update.message.chat.title]
                 except KeyError:
-                    print 'Got Message from unknown channel: %s ' % update.message.chat.title
+                    print 'unknown channel: %s ' % update.message.chat.title
                     continue
                 message = update.message.text.encode('utf-8')
 
@@ -105,7 +107,8 @@ class SlackManager():
                                                message)
 
                 # avatar = update.message.from_user.avatar
-                avatar = 'https://telegram.org/img/t_logo.png' #weird issue that makes slack display wrong icons so fuck it
+                avatar = 'https://telegram.org/img/t_logo.png' 
+                #weird issue that makes slack display wrong icons so fuck it
                 print 'avatar for slack:', avatar
                 self.bot.api_call('chat.postMessage',
                                 channel=channel,
@@ -114,7 +117,8 @@ class SlackManager():
                                 icon_url=avatar
                                 )
             except Exception, e:
-                print 'Something went wrong - forwarding to Slack'  # fuck it so it won't crash ever
+                print 'Something went wrong - forwarding to Slack'  
+                # fuck it so it won't crash ever
                 print str(e)
                 time.sleep(5)
 
