@@ -5,7 +5,6 @@ Created on 26.09.2015
 '''
 import Queue
 import threading
-import telegram_coms
 import time
 import ConfigParser
 from slack_coms import SlackManager

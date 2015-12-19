@@ -42,8 +42,7 @@ class TelegramManager():
                 for update in updates:
                     print 'Received from telegram:', update
                     if update.message.photo:
-                        update.message.text = self.download_file(self.bot,
-                                    update.message.photo[-1].file_id).file_path
+                        update.message.text = self.download_file(update.message.photo[-1].file_id).file_path
                     #get avatar
                     avatar = self.download_avatar(update.message.from_user.id)
                     update.message.from_user.avatar = avatar

@@ -80,6 +80,8 @@ class SlackManager():
                         break
             else:
                 print 'Failed to establish a connection to Slack!'
+            self.post_to_slack("recovering", 'diagnostics',
+                               'pats-testing-range')
 
     def forward_to_slack(self, queue):
         '''
