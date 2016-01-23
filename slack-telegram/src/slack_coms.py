@@ -16,7 +16,9 @@ class SlackManager():
         self.channel_matching = {'NEM::Red': 'nem_red',
                                  'NEM::Tech': 'nem_tech',
                                  'NEM::Mobile Testnet': 'nem_mobile_testing',
-                                 'NEMberia 2.0': 'nemberia'}
+                                 'NEMberia 2.0': 'nemberia',
+                                 'Lighwallet':'lightwallethq'}
+        
         self.emo_matching = {':stuck_out_tongue:': ':P',
                              ':smile:': ':D',
                             ':simple_smile:': ':)',

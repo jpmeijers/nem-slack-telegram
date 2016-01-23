@@ -9,7 +9,8 @@ import time
 CHANNEL_MATCHING = {'G0BCJ6A11': '-23053030',
                     'G085E7UF2': '-14284494',
                     'G0C7PQQ5V': '-11209025',
-                    'G0K754RGB': '-108453376'}
+                    'G0K754RGB': '-108453376',
+                    'G0K7MCCTU': '-87276436'}
 
 
 class TelegramManager():
