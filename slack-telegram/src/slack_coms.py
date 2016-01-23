@@ -15,7 +15,8 @@ class SlackManager():
         self.bot = SlackClient(token)
         self.channel_matching = {'NEM::Red': 'nem_red',
                                  'NEM::Tech': 'nem_tech',
-                                 'NEM::Mobile Testnet': 'nem_mobile_testing'}
+                                 'NEM::Mobile Testnet': 'nem_mobile_testing',
+                                 'NEMberia 2.0': 'nemberia'}
         self.emo_matching = {':stuck_out_tongue:': ':P',
                              ':smile:': ':D',
                             ':simple_smile:': ':)',
@@ -96,7 +97,7 @@ class SlackManager():
                 try:
                     channel = self.channel_matching[update.message.chat.title]
                 except KeyError:
-                    print 'unknown channel: %s ' % update.message.chat.title
+                    print 'unknown telegram channel: %s ' % update.message.chat.title
                     continue
                 message = update.message.text.encode('utf-8')
 

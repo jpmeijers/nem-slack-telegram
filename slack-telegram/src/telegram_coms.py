@@ -8,16 +8,15 @@ import time
 
 CHANNEL_MATCHING = {'G0BCJ6A11': '-23053030',
                     'G085E7UF2': '-14284494',
-                    'G0C7PQQ5V': '-11209025'}
+                    'G0C7PQQ5V': '-11209025',
+                    'G0K754RGB': '-108453376'}
 
 
 class TelegramManager():
 
     def __init__(self, token, *args, **kwargs):
         self.bot = telegram.Bot(token)
-        self.channel_matching = {'G0BCJ6A11': '-23053030',
-                                'G085E7UF2': '-14284494',
-                                'G0C7PQQ5V': '-11209025'}
+        self.channel_matching = CHANNEL_MATCHING
 
     def download_file(self, file_id):
         return self.bot.getFile(file_id=file_id)
@@ -43,6 +42,8 @@ class TelegramManager():
                     print 'Received from telegram:', update
                     if update.message.photo:
                         update.message.text = self.download_file(update.message.photo[-1].file_id).file_path
+                    if update.message.document:
+                        update.message.text = self.download_file(update.message.document.file_id).file_path
                     #get avatar
                     avatar = self.download_avatar(update.message.from_user.id)
                     update.message.from_user.avatar = avatar
@@ -72,7 +73,7 @@ class TelegramManager():
                 try:
                     channel = self.channel_matching[update['channel']]
                 except KeyError:
-                    print 'unknown channel: %s ' % update['channel']
+                    print 'unknown slack channel: %s ' % update['channel']
                     continue
                 message = '%s \n %s' % (username, update['text'])
                 self.bot.sendMessage(chat_id=channel,
