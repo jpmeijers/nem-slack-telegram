@@ -77,7 +77,7 @@ class SlackManager():
                     except Exception, e:
                         print 'Something went wrong - listening to Slack'
                         # fuck it so it won't crash ever
-                        message = ":".join(type(e).__name__, str(e))
+                        message = ":".join([type(e).__name__, str(e)])
                         self.post_to_slack(message, 'diagnostics',
                                            'pats-testing-range')
                         break
