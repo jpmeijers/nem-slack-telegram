@@ -17,8 +17,9 @@ class SlackManager():
                                  'NEM::Tech': 'nem_tech',
                                  'NEM::Mobile Testnet': 'nem_mobile_testing',
                                  'NEMberia 2.0': 'nemberia',
-                                 'NEM::Lightwallet':'lightwallethq'}
-        
+                                 'NEM::Lightwallet':'lightwallethq',
+                                 'general updates slack':'general-updates'}
+
         self.emo_matching = {':stuck_out_tongue:': ':P',
                              ':smile:': ':D',
                             ':simple_smile:': ':)',

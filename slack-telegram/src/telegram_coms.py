@@ -10,7 +10,8 @@ CHANNEL_MATCHING = {'G0BCJ6A11': '-23053030',
                     'G085E7UF2': '-14284494',
                     'G0C7PQQ5V': '-11209025',
                     'G0K754RGB': '-108453376',
-                    'G0K7MCCTU': '-87276436'}
+                    'G0K7MCCTU': '-87276436',
+                    'C0402EBV4': '-105936925'}
 
 
 class TelegramManager():
