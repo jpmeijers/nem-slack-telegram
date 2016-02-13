@@ -16,8 +16,26 @@ Config.read("config.ini")
 SLACK_TOKEN = Config.get('Token', 'Slack')
 TELEGRAM_TOKEN = Config.get('Token', 'Telegram')
 
-slack = SlackManager(SLACK_TOKEN)
-telegram = TelegramManager(TELEGRAM_TOKEN)
+
+SLACK_CHANNEL_MATCHING = {'G0BCJ6A11': -23053030,
+                             'G085E7UF2': -14284494,
+                             'G0C7PQQ5V': -11209025,
+                             'G0K754RGB': -108453376,
+                             'G0K7MCCTU': -87276436,
+                             'C0402EBV4': -105936925}
+
+TELEGRAM_CHANNEL_MATCHING = {tel_channel: slack_channel for slack_channel,
+                          tel_channel in SLACK_CHANNEL_MATCHING.items()}
+
+
+SLACK_EMO_MATCHING = {':stuck_out_tongue:': ':P',
+                             ':smile:': ':D',
+                            ':simple_smile:': ':)',
+                            ':wink:': ';)', }
+
+slack = SlackManager(SLACK_TOKEN, TELEGRAM_CHANNEL_MATCHING,
+                     SLACK_EMO_MATCHING)
+telegram = TelegramManager(TELEGRAM_TOKEN, SLACK_CHANNEL_MATCHING)
 
 '''Queues are used to pass information between Threads. Duh!'''
 slack_output_queue = Queue.Queue()
@@ -59,7 +77,7 @@ if __name__ == '__main__':
                                                      threading.enumerate())
             slack.post_to_slack(message, 'diagnostics',
                                      'pats-testing-range')
-            time.sleep(60 * 60 * 5)
+            time.sleep(60 * 60 * 24)
         except KeyboardInterrupt:
             raise
         except:

@@ -6,19 +6,12 @@ Created on 26.09.2015
 import telegram
 import time
 
-CHANNEL_MATCHING = {'G0BCJ6A11': '-23053030',
-                    'G085E7UF2': '-14284494',
-                    'G0C7PQQ5V': '-11209025',
-                    'G0K754RGB': '-108453376',
-                    'G0K7MCCTU': '-87276436',
-                    'C0402EBV4': '-105936925'}
-
 
 class TelegramManager():
 
-    def __init__(self, token, *args, **kwargs):
+    def __init__(self, token, channel_matching, *args, **kwargs):
         self.bot = telegram.Bot(token)
-        self.channel_matching = CHANNEL_MATCHING
+        self.channel_matching = channel_matching
 
     def download_file(self, file_id):
         return self.bot.getFile(file_id=file_id)
@@ -26,8 +19,9 @@ class TelegramManager():
     def download_avatar(self, uid):
         try:
             file_id = self.bot.getUserProfilePhotos(uid).photos[0][0].file_id
-            return self.download_file(self.bot, file_id).file_path
-        except:
+            return self.download_file(file_id).file_path
+        except Exception, e:
+            print str(e)
             return None
 
     def listen_to_telegram(self, queue):
@@ -41,7 +35,7 @@ class TelegramManager():
             try:
                 updates = self.bot.getUpdates(offset=last_update + 1)
                 for update in updates:
-                    print 'Received from telegram:', update
+                    #print 'Received from telegram:', update
                     if update.message.photo:
                         update.message.text = self.download_file(update.message.photo[-1].file_id).file_path
                     if update.message.document:

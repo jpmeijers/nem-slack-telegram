@@ -11,19 +11,11 @@ from slackclient import SlackClient
 
 class SlackManager():
 
-    def __init__(self, token, *args, **kwargs):
+    def __init__(self, token, channel_matching, emo_matching=None,
+                 *args, **kwargs):
         self.bot = SlackClient(token)
-        self.channel_matching = {'NEM::Red': 'nem_red',
-                                 'NEM::Tech': 'nem_tech',
-                                 'NEM::Mobile Testnet': 'nem_mobile_testing',
-                                 'NEMberia 2.0': 'nemberia',
-                                 'NEM::Lightwallet':'lightwallethq',
-                                 'general updates slack':'general-updates'}
-
-        self.emo_matching = {':stuck_out_tongue:': ':P',
-                             ':smile:': ':D',
-                            ':simple_smile:': ':)',
-                            ':wink:': ';)', }
+        self.channel_matching = channel_matching
+        self.emo_matching = emo_matching
 
     def _resolve_user(self, uid):
         user = json.loads(self.bot.api_call('users.info',
@@ -63,7 +55,7 @@ class SlackManager():
                     try:
                         updates = self.bot.rtm_read()
                         for update in updates:
-                            print 'Received from slack', update
+                            #print 'Received from slack', update
                             if update.get('subtype') == 'bot_message':
                                 #msg from a bot - move on
                                 continue
@@ -98,9 +90,10 @@ class SlackManager():
             try:
                 update = queue.get()
                 try:
-                    channel = self.channel_matching[update.message.chat.title]
+                    channel = self.channel_matching[update.message.chat.id]
                 except KeyError:
-                    print 'unknown telegram channel: %s ' % update.message.chat.title
+                    print 'unknown telegram channel: %s ' % update.message.chat.id
+                    print self.channel_matching
                     continue
                 message = update.message.text.encode('utf-8')
 
@@ -112,10 +105,10 @@ class SlackManager():
                                                reply_to_message,
                                                message)
 
-                # avatar = update.message.from_user.avatar
-                avatar = 'https://telegram.org/img/t_logo.png' 
+                avatar = update.message.from_user.avatar
+                print avatar
+                # avatar = 'https://telegram.org/img/t_logo.png'
                 #weird issue that makes slack display wrong icons so fuck it
-                print 'avatar for slack:', avatar
                 self.bot.api_call('chat.postMessage',
                                 channel=channel,
                                 text=message,
@@ -123,7 +116,7 @@ class SlackManager():
                                 icon_url=avatar
                                 )
             except Exception, e:
-                print 'Something went wrong - forwarding to Slack'  
+                print 'Something went wrong - forwarding to Slack'
                 # fuck it so it won't crash ever
                 print str(e)
                 time.sleep(5)
