@@ -6,6 +6,7 @@ Created on 26.09.2015
 import time
 import json
 import re
+import logging
 from slackclient import SlackClient
 
 
@@ -40,8 +41,8 @@ class SlackManager():
                                                         username)
             update['user'] = user
             update['text'] = self.replace_emos(update['text'])
-        except:
-            pass  # fuck anything
+        except Exception, e:
+            logging.error(str(e))
         return update
 
     def listen_to_slack(self, queue):
@@ -50,7 +51,7 @@ class SlackManager():
         '''
         while True:
             if self.bot.rtm_connect():
-                print 'Listening to Slack'
+                logging.info('Listening to Slack')
                 while True:
                     try:
                         updates = self.bot.rtm_read()
@@ -64,20 +65,14 @@ class SlackManager():
                                 continue
                             else:
                                 update = self.prep_message(update)
-                                print 'Queued: ', update
+                                logging.debug('Queued: %s' % update)
                                 queue.put(update)
                             time.sleep(1)
                     except Exception, e:
-                        print 'Something went wrong - listening to Slack'
-                        # fuck it so it won't crash ever
-                        message = ":".join([type(e).__name__, str(e)])
-                        self.post_to_slack(message, 'diagnostics',
-                                           'pats-testing-range')
+                        logging.error(str(e))
                         break
             else:
-                print 'Failed to establish a connection to Slack!'
-            self.post_to_slack("recovering", 'diagnostics',
-                               'pats-testing-range')
+                logging.error('Failed to establish a connection to Slack!')
 
     def forward_to_slack(self, queue):
         '''
@@ -85,15 +80,14 @@ class SlackManager():
         Messages are expected to be objects as returned from the
         Telegram API.
         '''
-        print 'Ready to forward to Slack'
+        logging.info('Ready to forward to Slack')
         while True:
             try:
                 update = queue.get()
                 try:
                     channel = self.channel_matching[update.message.chat.id]
                 except KeyError:
-                    print 'unknown telegram channel: %s ' % update.message.chat.id
-                    print self.channel_matching
+                    logging.error('unknown telegram channel: %s ' % update.message.chat.id)
                     continue
                 message = update.message.text.encode('utf-8')
 
@@ -106,7 +100,6 @@ class SlackManager():
                                                message)
 
                 avatar = update.message.from_user.avatar
-                print avatar
                 # avatar = 'https://telegram.org/img/t_logo.png'
                 #weird issue that makes slack display wrong icons so fuck it
                 self.bot.api_call('chat.postMessage',
@@ -116,9 +109,7 @@ class SlackManager():
                                 icon_url=avatar
                                 )
             except Exception, e:
-                print 'Something went wrong - forwarding to Slack'
-                # fuck it so it won't crash ever
-                print str(e)
+                logging.error(str(e))
                 time.sleep(5)
 
     def post_to_slack(self, message, user, channel):

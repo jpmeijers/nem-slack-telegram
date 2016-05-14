@@ -7,8 +7,13 @@ import Queue
 import threading
 import time
 import ConfigParser
+import logging
 from slack_coms import SlackManager
 from telegram_coms import TelegramManager
+
+logging.basicConfig(filename='bridge.log',
+                    format='%(levelname)s: %(asctime)s %(message)s in %(module)s on line %(lineno)d',
+                    level=logging.DEBUG)
 
 Config = ConfigParser.ConfigParser()
 Config.read("config.ini")
@@ -80,5 +85,5 @@ if __name__ == '__main__':
             time.sleep(60 * 60 * 24)
         except KeyboardInterrupt:
             raise
-        except:
-            print 'Something went wrong'  # fuck it so it won't crash ever
+        except Exception, e:
+            logging.error(str(e))

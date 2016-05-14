@@ -5,6 +5,7 @@ Created on 26.09.2015
 '''
 import telegram
 import time
+import logging
 
 
 class TelegramManager():
@@ -21,16 +22,16 @@ class TelegramManager():
             file_id = self.bot.getUserProfilePhotos(uid).photos[0][0].file_id
             return self.download_file(file_id).file_path
         except Exception, e:
-            print str(e)
+            logging.error(str(e))
             return None
 
     def listen_to_telegram(self, queue):
         '''
         Queries Telegram for Updates and puts them into a queue.
         '''
+        logging.info('Listening to Telegram')
+        logging.info(self.bot.getMe())
         last_update = 0
-        print 'Listening to Telegram'
-        print self.bot.getMe()
         while True:
             try:
                 updates = self.bot.getUpdates(offset=last_update + 1)
@@ -43,14 +44,12 @@ class TelegramManager():
                     #get avatar
                     avatar = self.download_avatar(update.message.from_user.id)
                     update.message.from_user.avatar = avatar
-                    print 'Queued: ', update
+                    logging.debug('Queued: %s' % update)
                     queue.put(update)
                     last_update = update['update_id']
                 time.sleep(1)
             except Exception, e:
-                print 'Something went wrong - listening to telegram'
-                # fuck it so it won't crash ever
-                print str(e)
+                logging.error(str(e))
                 time.sleep(5)
 
     def forward_to_telegram(self, queue):
@@ -58,7 +57,7 @@ class TelegramManager():
         Takes a message from a queue and posts it to telegram.
         Messages are expected to look like as they come from slack
         '''
-        print 'Ready to forward to Telegram'
+        logging.info('Ready to forward to Telegram')
         while True:
             try:
                 update = queue.get()
@@ -69,13 +68,11 @@ class TelegramManager():
                 try:
                     channel = self.channel_matching[update['channel']]
                 except KeyError:
-                    print 'unknown slack channel: %s ' % update['channel']
+                    logging.error('unknown slack channel: %s ' % update['channel'])
                     continue
                 message = '%s \n %s' % (username, update['text'])
                 self.bot.sendMessage(chat_id=channel,
                                         text=message)
             except Exception, e:
-                print 'Something went wrong - forwarding to telegram'
-                # fuck it so it won't crash ever
-                print str(e)
+                logging.error(str(e))
                 time.sleep(5)
