@@ -21,6 +21,8 @@ class TelegramManager():
         try:
             file_id = self.bot.getUserProfilePhotos(uid).photos[0][0].file_id
             return self.download_file(file_id).file_path
+        except IndexError:
+            pass  # if there's no avatar, there's no avatar
         except Exception, e:
             logging.error(str(e))
             return None
