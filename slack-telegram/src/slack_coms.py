@@ -30,8 +30,11 @@ class SlackManager():
 
     def prep_message(self, update):
         try:
-            #resolve mentionings
+            #get user data
             user = self._resolve_user(update['user'])
+            update['user'] = user  # user is a dict now
+
+            #resolve mentionings
             marked_users = set([m.group(1) for m in
                                             re.finditer('<@([A-Z0-9]+)>',
                                                         update['text'])])
@@ -39,7 +42,7 @@ class SlackManager():
                 username = self._resolve_user(marked_user)['name']
                 update['text'] = update['text'].replace(marked_user,
                                                         username)
-            update['user'] = user
+            #replace emos
             update['text'] = self.replace_emos(update['text'])
         except Exception, e:
             logging.error(str(e))
@@ -89,6 +92,7 @@ class SlackManager():
                 except KeyError:
                     logging.error('unknown telegram channel: %s ' % update.message.chat.id)
                     continue
+                logging.debug(update.message.text)
                 message = update.message.text.encode('utf-8')
 
                 #resolve quotes

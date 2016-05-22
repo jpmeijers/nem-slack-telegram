@@ -13,7 +13,7 @@ from telegram_coms import TelegramManager
 
 logging.basicConfig(filename='bridge.log',
                     format='%(levelname)s: %(asctime)s %(message)s in %(module)s on line %(lineno)d',
-                    level=logging.ERROR)
+                    level=logging.DEBUG)
 
 Config = ConfigParser.ConfigParser()
 Config.read("config.ini")
