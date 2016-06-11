@@ -13,7 +13,9 @@ from telegram_coms import TelegramManager
 
 logging.basicConfig(filename='bridge.log',
                     format='%(levelname)s: %(asctime)s %(message)s in %(module)s on line %(lineno)d',
-                    level=logging.DEBUG)
+                    level=logging.ERROR)
+
+#logging.getLogger().addHandler(logging.StreamHandler())
 
 Config = ConfigParser.ConfigParser()
 Config.read("config.ini")
@@ -27,7 +29,8 @@ SLACK_CHANNEL_MATCHING = {'G0BCJ6A11': -23053030,
                              'G0C7PQQ5V': -11209025,
                              'G0K754RGB': -108453376,
                              'G0K7MCCTU': -87276436,
-                             'C0402EBV4': -105936925}
+                             'C0402EBV4': -105936925,
+                             'G1E69LH60': -146980320}
 
 TELEGRAM_CHANNEL_MATCHING = {tel_channel: slack_channel for slack_channel,
                           tel_channel in SLACK_CHANNEL_MATCHING.items()}
