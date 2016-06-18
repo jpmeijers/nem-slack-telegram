@@ -38,7 +38,8 @@ class TelegramManager():
             try:
                 updates = self.bot.getUpdates(offset=last_update + 1)
                 for update in updates:
-                    #print 'Received from telegram:', update
+                    if not update.message:
+                        continue
                     if update.message.photo:
                         update.message.text = self.download_file(update.message.photo[-1].file_id).file_path
                     if update.message.document:

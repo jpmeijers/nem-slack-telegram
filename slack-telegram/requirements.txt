@@ -1,2 +1,2 @@
-python-telegram-bot==2.8.7
+python-telegram-bot==4.2.1
 slackclient==0.16
