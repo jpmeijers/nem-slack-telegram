@@ -6,6 +6,7 @@ Created on 26.09.2015
 import time
 import json
 import re
+import HTMLParser
 import logging
 from slackclient import SlackClient
 
@@ -19,14 +20,30 @@ class SlackManager():
         self.emo_matching = emo_matching
 
     def _resolve_user(self, uid):
-        user = json.loads(self.bot.api_call('users.info',
-                                         user=uid))
+        user = self.bot.api_call('users.info', user=uid)
         return user['user']
 
     def replace_emos(self, text):
         for i, j in self.emo_matching.iteritems():
             text = text.replace(i, j)
         return text
+
+    def clean_channel_name(self, text):
+        # <#C2UXXXX4T|emergency> aand /message/emergency nog niet
+        # en nu hoort <@joname> ook goed te werken
+        # <@joname> kan jij een cname opstel vanaf <http://slack.xxx.xx|slack.xxx.xx> naar <http://xxxxxx.slack.com|xxxxxx.slack.com>
+        #
+        string = re.sub(r'<#\S*?\|(\S*?)>', r"#\1", text)
+        string = re.sub(r'<@\S*?\|(\S*?)>', r"@\1", string)
+        string = re.sub(r'<@(\S*?)>', r"@\1", string)
+        # translate <http://www.foo.bar/|linkname> to [linkname](http://www.foo.bar/)
+        string = re.sub(r'<(\S*?)\|(.*?)>', r"[\2](\1)", string)
+        return string
+
+    def clean_html_entities(self, text):
+        pars = HTMLParser.HTMLParser()
+        output = pars.unescape(text)
+        return output
 
     def prep_message(self, update):
         try:
@@ -44,6 +61,9 @@ class SlackManager():
                                                         username)
             #replace emos
             update['text'] = self.replace_emos(update['text'])
+            #remove channel code from name
+            update['text'] = self.clean_channel_name(update['text'])
+            update['text'] = self.clean_html_entities(update['text'])
         except Exception, e:
             logging.error(str(e))
         return update
@@ -56,6 +76,7 @@ class SlackManager():
             if self.bot.rtm_connect():
                 logging.info('Listening to Slack')
                 while True:
+                    time.sleep(1)
                     try:
                         updates = self.bot.rtm_read()
                         for update in updates:
@@ -106,10 +127,15 @@ class SlackManager():
                 avatar = update.message.from_user.avatar
                 # avatar = 'https://telegram.org/img/t_logo.png'
                 #weird issue that makes slack display wrong icons so fuck it
+
+                username = update.message.from_user.username
+                if(username == ""):
+                    username = update.message.from_user.first_name
+
                 self.bot.api_call('chat.postMessage',
                                 channel=channel,
                                 text=message,
-                                username=update.message.from_user.username,
+                                username=username,
                                 icon_url=avatar
                                 )
             except Exception, e:

@@ -6,6 +6,7 @@ Created on 26.09.2015
 import telegram
 import time
 import logging
+import json
 
 
 class TelegramManager():
@@ -35,6 +36,7 @@ class TelegramManager():
         logging.info(self.bot.getMe())
         last_update = 0
         while True:
+            time.sleep(1)
             try:
                 updates = self.bot.getUpdates(offset=last_update + 1)
                 for update in updates:
@@ -73,9 +75,10 @@ class TelegramManager():
                 except KeyError:
                     logging.error('unknown slack channel: %s ' % update['channel'])
                     continue
-                message = '%s \n %s' % (username, update['text'])
+                message = '*%s*\n%s' % (username, update['text'])
                 self.bot.sendMessage(chat_id=channel,
-                                        text=message)
+                                        text=message,
+                                        parse_mode="Markdown")
             except Exception, e:
                 logging.error(str(e))
                 time.sleep(5)
